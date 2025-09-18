@@ -14,17 +14,27 @@ builder.Services.AddDbContext<RFIDDbContext>(options =>
 builder.Services.AddSignalR();
 
 // ตั้งค่า CORS
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowNextJs", policy =>
+//    {
+//        policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://localhost:7233", "http://localhost:7233", "http://localhost:5090", "https://rfid-pos-ui-bnow.vercel.app", "http://localhost:5173", "http://192.168.1.99:3000", "https://www.ymt-group.com")
+//              .AllowAnyMethod()
+//              .AllowAnyHeader()
+//              .AllowCredentials();
+//    });
+//});
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNextJs", policy =>
+    options.AddPolicy("AllowAllWithCredentials", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://localhost:7233", "http://localhost:7233", "http://localhost:5090", "https://rfid-pos-ui-bnow.vercel.app")
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
+        policy
+            .SetIsOriginAllowed(origin => true) // รับทุก origin
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
-
 // เพิ่ม Controller support
 builder.Services.AddControllers();
 
@@ -43,7 +53,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // ใช้ CORS
-app.UseCors("AllowNextJs");
+app.UseCors("AllowAllWithCredentials");
 
 // เพิ่ม Swagger UI (เฉพาะ Development)
 if (app.Environment.IsDevelopment())

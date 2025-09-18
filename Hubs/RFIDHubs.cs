@@ -9,10 +9,11 @@ namespace RFIDApi.Hubs
     public class RFIDHubs : Hub
     {
         private readonly RFIDDbContext _db;
-
-        public RFIDHubs(RFIDDbContext db)
+        private readonly IHubContext<RFIDHubs> _hubContext;
+        public RFIDHubs(RFIDDbContext db, IHubContext<RFIDHubs> hubContext)
         {
             _db = db;
+            _hubContext = hubContext;
         }
 
         // เมธอดสำหรับส่งข้อมูล RFID แบบ real-time
@@ -46,6 +47,7 @@ namespace RFIDApi.Hubs
             // ส่งข้อมูลไปยัง client ที่เรียกเมธอดนี้
             await Clients.Caller.SendAsync("ReceiveLatestRFIDTags", tags);
         }
+        
 
         // เมธอดสำหรับอ่าน RFID แบบ real-time (ตัวอย่าง)
         //public async Task StartReading()
