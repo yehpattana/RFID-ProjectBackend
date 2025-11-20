@@ -120,5 +120,31 @@ namespace RFIDApi.controller
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("DeleteProductRFID")]
+        public async Task<IActionResult> DeleteProductRFID(DeleteRfidProductRequest[] data)
+        {
+            try
+            {
+                var rfids = data.Select(d => d.rfid).ToList();
+
+                var itemsToDelete = await _context.ProductsRFID
+                            .ToListAsync();
+
+                if (!itemsToDelete.Any())
+                {
+                    return BadRequest("Not found Product in system");
+                }
+                var existItem = itemsToDelete.Where(p => rfids.Contains(p.RFID)).ToList();
+                _context.ProductsRFID.RemoveRange(existItem);
+                await _context.SaveChangesAsync();
+                
+                return Ok($"Remove RFID Product success Total : {existItem.Count}");
+
+            }
+            catch (Exception ex) { 
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

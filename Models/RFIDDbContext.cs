@@ -24,6 +24,8 @@ namespace RFIDApi.Models // เปลี่ยน namespace ตามโปร�
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductRFID> ProductsRFID { get; set; }
+        public DbSet<ShopifySalesDaily> shopifySalesDailies { get; set; }
+        public DbSet<ShopifyWarehouseStock> shopifyWarehouseStocks { get; set; }
 
     }
 }

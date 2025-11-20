@@ -13,4 +13,12 @@
         public int targetQty { get; set; }
         public string EPC { get; set; }
     }
+
+    public class DeleteRfidProductRequest
+    {
+        public string sku { get; set; }
+        
+        public string rfid { get; set; }
+
+    }
 }
