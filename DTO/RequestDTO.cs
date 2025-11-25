@@ -13,7 +13,11 @@
         public int targetQty { get; set; }
         public string EPC { get; set; }
     }
-
+    public class AddRfidToProductBySKURequest
+    {
+        public string SKU { get; set; }
+        public string EPC { get; set; }
+    }
     public class DeleteRfidProductRequest
     {
         public string sku { get; set; }

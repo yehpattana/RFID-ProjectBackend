@@ -20,7 +20,7 @@ namespace RFIDApi.Models // เปลี่ยน namespace ตามโปร�
             .HasForeignKey(pr => pr.SKU);
         }
 
-        public DbSet<RFIDTag> RFIDTags { get; set; }
+
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ProductRFID> ProductsRFID { get; set; }

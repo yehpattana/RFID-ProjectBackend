@@ -38,15 +38,15 @@ namespace RFIDApi.Hubs
         }
 
         // เมธอดสำหรับดึง RFID tags ล่าสุด
-        public async Task GetLatestRFIDTags()
-        {
-            var tags = await _db.RFIDTags
-                .Take(10)
-                .ToListAsync();
+        //public async Task GetLatestRFIDTags()
+        //{
+        //    var tags = await _db.RFIDTags
+        //        .Take(10)
+        //        .ToListAsync();
 
-            // ส่งข้อมูลไปยัง client ที่เรียกเมธอดนี้
-            await Clients.Caller.SendAsync("ReceiveLatestRFIDTags", tags);
-        }
+        //    // ส่งข้อมูลไปยัง client ที่เรียกเมธอดนี้
+        //    await Clients.Caller.SendAsync("ReceiveLatestRFIDTags", tags);
+        //}
         
 
         // เมธอดสำหรับอ่าน RFID แบบ real-time (ตัวอย่าง)
@@ -69,16 +69,16 @@ namespace RFIDApi.Hubs
         //        await Clients.Caller.SendAsync("Error", ex.Message);
         //    }
         //}
-        public async Task TestBroadcast()
-        {
-            var testTag = new RFIDTag
-            {
-                EPC = "TEST123456789",
-                ReadTime = DateTime.UtcNow,
-                IsActive = 1
-            };
+        //public async Task TestBroadcast()
+        //{
+        //    var testTag = new RFIDTag
+        //    {
+        //        EPC = "TEST123456789",
+        //        ReadTime = DateTime.UtcNow,
+        //        IsActive = 1
+        //    };
 
-            await Clients.All.SendAsync("ReceiveRFIDUpdate", testTag);
-        }
+        //    await Clients.All.SendAsync("ReceiveRFIDUpdate", testTag);
+        //}
     }
 }

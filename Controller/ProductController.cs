@@ -121,6 +121,56 @@ namespace RFIDApi.controller
             }
         }
 
+
+        [HttpPost("AddRfidToProductBySKU")]
+        public async Task<IActionResult> AddRfidToProductBySKU(AddRfidToProductBySKURequest[] request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest("Request Data is Empty");
+                }
+
+                var error = new List<string>();
+                foreach (var item in request)
+                {
+
+                    var db = await _context.ProductsRFID.Where(t => t.RFID == item.EPC).ToListAsync();
+                    if (db.Count > 0 || db.Any())
+                    {
+                        foreach (var i in db)
+                        {
+                            error.Add($"{i.RFID} is Already Register on {i.SKU}");
+                        }
+                    }
+                    else
+                    {
+
+                        var data = await _context.Products.FirstOrDefaultAsync(t => t.Sku == item.SKU);
+                        var newData = new ProductRFID
+                        {
+                            RFID = item.EPC,
+                            SKU = data.Sku,
+                            CreateDate = DateTime.Now
+                        };
+                        await _context.ProductsRFID.AddAsync(newData);
+
+                    }
+                }
+                if (error.Any())
+                {
+                    return BadRequest(error);
+                }
+                await _context.SaveChangesAsync();
+                return Ok("Add RFID Success");
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("DeleteProductRFID")]
         public async Task<IActionResult> DeleteProductRFID(DeleteRfidProductRequest[] data)
         {
