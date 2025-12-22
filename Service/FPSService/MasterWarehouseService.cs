@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using RFIDApi.DTO;
 using RFIDApi.DTO.Data;
 using RFIDApi.Helper;
-using RFIDApi.Models;
 using RFIDApi.Models.FPS;
 using RFIDApi.Service.Interface;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Security.Policy;
 using Microsoft.AspNetCore.Mvc;
+using RFIDApi.Models.Context;
 
 namespace RFIDApi.Service.FPSService
 {

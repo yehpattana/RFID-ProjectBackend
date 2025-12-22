@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RFIDApi.DTO;
 using RFIDApi.Helper;
-using RFIDApi.Models;
+using RFIDApi.Models.Context;
 using RFIDApi.Models.FPS;
 using RFIDApi.Service.Interface;
 

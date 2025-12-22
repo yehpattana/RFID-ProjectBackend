@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RFIDApi.Models;
 using RFIDReaderAPI;
 using RFIDReaderAPI.Interface;
 using RFIDReaderAPI.Models;
@@ -14,6 +13,7 @@ using RFIDApi.DTO;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Linq;
 using Microsoft.IdentityModel.Tokens;
+using RFIDApi.Models.Context;
 namespace RFIDApi.controller
 {
     [Route("rfidApi/[controller]")]

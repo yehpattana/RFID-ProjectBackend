@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore; // แทน System.Data.Entity
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace RFIDApi.Models // เปลี่ยน namespace ตามโปรเจกต์ใหม่
+namespace RFIDApi.Models.Context // เปลี่ยน namespace ตามโปรเจกต์ใหม่
 {
     public class RFIDDbContext : DbContext
     {
         public RFIDDbContext(DbContextOptions<RFIDDbContext> options) : base(options)
         {
-            
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

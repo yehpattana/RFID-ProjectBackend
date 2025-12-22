@@ -1,12 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RFIDApi.DTO.Data;
 using RFIDApi.Models.FPS;
+using RFIDApi.Service.Tenant;
 
-namespace RFIDApi.Models
+namespace RFIDApi.Models.Context
 {
     public class FPSDbContext : DbContext
     {
-        public FPSDbContext(DbContextOptions<FPSDbContext> options) : base(options)
+
+        public FPSDbContext(
+            DbContextOptions<FPSDbContext> options
+            )
+            : base(options)
         {
 
         }
@@ -16,10 +21,10 @@ namespace RFIDApi.Models
 
             modelBuilder.Entity<MasterProductOnline>().HasKey(p => new { p.CompanyCode, p.ItemCode, p.ColorCode, p.Size });
             modelBuilder.Entity<WarehouseInOutType>().HasKey(p => new { p.InoutType, p.TranType });
-            modelBuilder.Entity<Purchase_PODetail>().HasKey(p => new { p.PRNo, p.ItemNo,p.DlvCode,p.CustomerPO,p.Size });
+            modelBuilder.Entity<Purchase_PODetail>().HasKey(p => new { p.PRNo, p.ItemNo, p.DlvCode, p.CustomerPO, p.Size });
             modelBuilder.Entity<FPSWarehouseTransection>().HasKey(p => new { p.ReceiveNo, p.RFId });
 
-            modelBuilder.Entity<MasterProductOnline>().HasMany(p => p.WarehouseRFIDs).WithOne(w => w.MasterProductOnline).HasForeignKey(f => new { f.ItemCode,f.Size,f.ColorCode,f.CompanyCode});
+            modelBuilder.Entity<MasterProductOnline>().HasMany(p => p.WarehouseRFIDs).WithOne(w => w.MasterProductOnline).HasForeignKey(f => new { f.ItemCode, f.Size, f.ColorCode, f.CompanyCode });
             // Entities relation with transaction
             modelBuilder.Entity<WarehouseRFID>().HasMany(p => p.WarehouseTransections).WithOne(w => w.WarehouseRFID).HasForeignKey(f => f.RFId);
             modelBuilder.Entity<WarehouseReceive>().HasMany(p => p.WarehouseTransections).WithOne(w => w.WarehouseReceive).HasForeignKey(f => f.ReceiveNo);
@@ -28,6 +33,8 @@ namespace RFIDApi.Models
 
             base.OnModelCreating(modelBuilder);
         }
+
+
         public DbSet<MasterProductOnline> masterProductOnlines { get; set; }
         public DbSet<MasterWarehouse> masterWarehouses { get; set; }
         public DbSet<WarehouseInOutType> warehouseInOutTypes
@@ -51,5 +58,7 @@ namespace RFIDApi.Models
         {
             get; set;
         }
+
+        public DbSet<FPS_User> users { get; set; }
     }
 }

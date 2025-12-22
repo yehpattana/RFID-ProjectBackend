@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Concurrent;
+using RFIDApi.Models.Context;
 namespace RFIDApi.controller
 {
     [Route("rfidApi/[controller]")]

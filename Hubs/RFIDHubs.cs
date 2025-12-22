@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using RFIDApi.Models;
 using Microsoft.EntityFrameworkCore;
 using RFIDReaderAPI;
-using System.Diagnostics; // Namespace ของ RFIDReaderAPI.dll (สมมติ)
+using System.Diagnostics;
+using RFIDApi.Models.Context; // Namespace ของ RFIDReaderAPI.dll (สมมติ)
 
 namespace RFIDApi.Hubs
 {

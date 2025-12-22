@@ -2,7 +2,7 @@
 using RFIDApi.DTO;
 using RFIDApi.DTO.Data;
 using RFIDApi.Helper;
-using RFIDApi.Models;
+using RFIDApi.Models.Context;
 using RFIDApi.Models.FPS;
 using RFIDApi.Service.Interface;
 
