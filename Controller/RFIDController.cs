@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Concurrent;
 namespace RFIDApi.controller
 {
     [Route("rfidApi/[controller]")]
@@ -22,11 +23,15 @@ namespace RFIDApi.controller
         private List<string> displayedEpcs = new List<string>();
 
         private readonly RFIDDbContext _context;
+        private readonly FPSDbContext _fbContext;
         private readonly IHubContext<RFIDHubs> _hubContext;
         private readonly IServiceScopeFactory _scopeFactory;
-        public RFIDController(RFIDDbContext db, IHubContext<RFIDHubs> hubContext, IServiceScopeFactory scopeFactory)
+        private readonly ConcurrentDictionary<string, DateTime> _lastSeen = new();
+        private readonly TimeSpan _window = TimeSpan.FromSeconds(3);
+        public RFIDController(RFIDDbContext db,FPSDbContext fbContext, IHubContext<RFIDHubs> hubContext, IServiceScopeFactory scopeFactory)
         {
             _context = db;
+            _fbContext = fbContext;
             _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
             _scopeFactory = scopeFactory;
         }
@@ -91,8 +96,26 @@ namespace RFIDApi.controller
             {
                 using (var scope = _scopeFactory.CreateScope())
                 {
+                    if (!ShouldAccept(tag.EPC))
+                    {
+                        return;
+                    }
                     var context = scope.ServiceProvider.GetRequiredService<RFIDDbContext>();
+                    var fpsContext = scope.ServiceProvider.GetRequiredService<FPSDbContext>();
+                    var existTag = await context.ProductsRFID
+                        .FirstOrDefaultAsync(t => t.RFID == tag.EPC);
 
+                    var stockOut = await fpsContext.warehouseTransections.FirstOrDefaultAsync(t => t.RFId == tag.EPC && t.OutStatus);
+                    bool isFound = false;
+                    bool isOut = false;
+                    if (existTag != null) 
+                    {
+                        isFound = true;
+                    }
+                    if (existTag != null && stockOut != null) 
+                    {
+                        isOut = true;
+                    }
                     var newTag = new RFIDTag
                     {
                         EPC = tag.EPC,
@@ -100,10 +123,12 @@ namespace RFIDApi.controller
                         Reader_Name = tag.ReaderName,
                         ANT_NUM = tag.ANT_NUM,
                         ReadTime = DateTime.Now,
-
+                        sku = existTag != null ? existTag.SKU : null,
+                        isFound = isFound,
+                        isOut = isOut
                     };
 
-                    await _hubContext.Clients.All.SendAsync("ReceiveRFIDData", tag.EPC);
+                    await _hubContext.Clients.All.SendAsync("ReceiveRFIDData", newTag);
 
                     //Debug.WriteLine($"Tag detected and sent to clients: {json}");
                     displayedEpcs.Add(tag.EPC);
@@ -114,7 +139,7 @@ namespace RFIDApi.controller
                 Debug.WriteLine($"Error in OutPutTags: {ex.Message}");
             }
         }
-        [NonAction]        
+        [NonAction]
         public int SetHF340ANTPower(string connID, Dictionary<int, int> antPower)
         {
             string param = string.Join("|", antPower.Select(kv => $"{kv.Key},{kv.Value}"));
@@ -154,6 +179,22 @@ namespace RFIDApi.controller
 
         void IAsynchronousMessage.WriteLog(string msg)
         {
+        }
+
+        [NonAction]
+        public bool ShouldAccept(string EPC)
+        {
+            var key = $"{EPC}";
+            var now = DateTime.UtcNow;
+
+            if (_lastSeen.TryGetValue(key, out var last))
+            {
+                if (now - last < _window)
+                    return false;
+            }
+
+            _lastSeen[key] = now;
+            return true;
         }
     }
 }

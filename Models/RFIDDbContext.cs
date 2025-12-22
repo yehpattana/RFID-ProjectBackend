@@ -11,13 +11,15 @@ namespace RFIDApi.Models // เปลี่ยน namespace ตามโปร�
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<ProductRFID>().HasKey(p => new { p.SKU, p.RFID });
 
             modelBuilder.Entity<ProductRFID>()
             .HasOne(pr => pr.Product)
             .WithMany(p => p.productRFIDs)
             .HasForeignKey(pr => pr.SKU);
+
+            base.OnModelCreating(modelBuilder);
         }
 
 

@@ -14,6 +14,7 @@ using RFIDApi.DTO;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Linq;
 using Microsoft.IdentityModel.Tokens;
+
 namespace RFIDApi.controller
 {
     [Route("rfidApi/[controller]")]
@@ -36,7 +37,7 @@ namespace RFIDApi.controller
         {
             try
             {
-                var data = await _context.Products.Where(t => t.Barcode != null && t.Barcode.Trim() != "").ToListAsync();
+                var data = await _context.Products.ToListAsync();
 
                 return Ok(data);
             }
@@ -85,6 +86,7 @@ namespace RFIDApi.controller
                     return BadRequest("Request Data is Empty");
                 }
                 var error = new List<string>();
+                List<ProductRFID> productRFIDs = new List<ProductRFID>();
                 foreach (var item in request) {
                     
                     var db = await _context.ProductsRFID.Where(t => t.RFID == item.EPC).ToListAsync();
@@ -105,10 +107,12 @@ namespace RFIDApi.controller
                             SKU = data.Sku,
                             CreateDate = DateTime.Now
                         };
-                        await _context.ProductsRFID.AddAsync(newData);
-                        
+                        productRFIDs.Add(newData);
+
+
                     }
                 }
+                await _context.ProductsRFID.AddRangeAsync(productRFIDs);
                 if (error.Any())
                 {
                     return BadRequest(error);

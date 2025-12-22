@@ -3,16 +3,25 @@ using RFIDApi.Models;
 using Microsoft.AspNetCore.SignalR;
 using RFIDApi.Hubs;
 using Microsoft.OpenApi.Models;
+using RFIDApi.Service.Interface;
+using RFIDApi.Service.FPSService;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // เพิ่ม DbContext
 builder.Services.AddDbContext<RFIDDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RFIDDbConnection")));
 
+builder.Services.AddDbContext<FPSDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("FPSDbConnection")));
+
+builder.Services.AddScoped<IMasterWarehouseService,MasterWarehouseService>();
+builder.Services.AddScoped<IMasterProductOnlineService, MasterProductOnlineService>();
+builder.Services.AddScoped<IWarehouseInOutTypeService, WarehouseInOutTypeService>();
+builder.Services.AddScoped<IPODetailService, PODetailService>();
+builder.Services.AddScoped<IPODescService, PODescService>();
+builder.Services.AddScoped<IWarehouseTransactionService, WarehouseTransactionService>();
 // เพิ่ม SignalR
 builder.Services.AddSignalR();
-
 // ตั้งค่า CORS
 //builder.Services.AddCors(options =>
 //{

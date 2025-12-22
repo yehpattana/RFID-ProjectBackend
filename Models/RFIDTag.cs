@@ -16,6 +16,9 @@ namespace RFIDApi.Models
         public string? Reader_Name { get; set; }
         public int? ANT_NUM { get; set; }
         public double? RSSI { get; set; }
+        public bool? isFound { get; set; }
+        public bool? isOut { get; set; }
+        public string? sku { get; set; }
         public DateTime ReadTime { get; set; }
 
 
