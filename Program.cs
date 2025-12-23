@@ -133,7 +133,8 @@ if (app.Environment.IsDevelopment())
         //c.RoutePrefix = string.Empty; // ทำให้ Swagger อยู่ที่ root
     });
 }
-
+app.UseAuthentication();
+app.UseAuthorization();
 // กำหนด SignalR Hub และ Controllers
 app.MapHub<RFIDHubs>("/rfidHub");
 app.MapControllers();

@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RFIDApi.Service.Interface;
 
@@ -17,6 +18,7 @@ namespace RFIDApi.Controller.FPS
             _poDescService = pODescService;
         }
 
+        [Authorize]
         [HttpGet("GetPODesc")]
         public async Task<IActionResult> GetsPODetail()
         {
@@ -25,6 +27,7 @@ namespace RFIDApi.Controller.FPS
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("GetPODetail")]
         public async Task<IActionResult> GetsPoDesc()
         {
@@ -32,6 +35,7 @@ namespace RFIDApi.Controller.FPS
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("GetPoDesc/options")]
         public async Task<IActionResult> GetPoDescOptions()
         {
@@ -39,6 +43,7 @@ namespace RFIDApi.Controller.FPS
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("GetPoDetail/{poNo}")]
         public async Task<IActionResult> GetPoDetailById(string poNo)
         {

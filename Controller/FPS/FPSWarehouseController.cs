@@ -32,6 +32,7 @@ namespace RFIDApi.Controller.FPS
             }
         }
 
+        [Authorize]
         [HttpGet("Gets/Options/{company}")]
 
         public async Task<IActionResult> GetOptions(string company)
@@ -40,7 +41,7 @@ namespace RFIDApi.Controller.FPS
             return Ok(result);
         }
 
-
+        [Authorize]
         [HttpGet("AutoRunReceiveNo/{company}")]
         public async Task<IActionResult> GetAutoRunReceiveNo(string company)
         {
@@ -54,6 +55,7 @@ namespace RFIDApi.Controller.FPS
             }
         }
 
+        [Authorize]
         [HttpPost("CreateReceiveInNo")]
         public async Task<IActionResult> CreateReceiveNo([FromBody]CreateWarehouseReceiveInDTO req)
         {
@@ -68,6 +70,7 @@ namespace RFIDApi.Controller.FPS
             }
         }
 
+        [Authorize]
         [HttpPut("UpdateReceiveInNo/{receiveNo}")]
         public async Task<IActionResult> UpdateReceiveInNo(string receiveNo,[FromBody]CreateWarehouseReceiveInDTO req)
         {
@@ -82,6 +85,7 @@ namespace RFIDApi.Controller.FPS
             }
         }
 
+        [Authorize]
         [HttpDelete("DeleteReceiveInNo/{receiveNo}")]
         public async Task<IActionResult> DeleteReceiveInNo(string receiveNo)
         {
@@ -95,6 +99,7 @@ namespace RFIDApi.Controller.FPS
             }
         }
 
+        [Authorize]
         [HttpGet("GetReceiveByNo/{receiveNo}")]
         public async Task<IActionResult> GetReceiveByNo(string receiveNo)
         {
@@ -109,6 +114,7 @@ namespace RFIDApi.Controller.FPS
             }
         }
 
+        [Authorize]
         [HttpGet("GetWarehouseRFID")]
         public async Task<IActionResult> GetWarehouseRFID()
         {

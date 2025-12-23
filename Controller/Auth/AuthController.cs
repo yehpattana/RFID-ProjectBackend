@@ -10,6 +10,9 @@ using RFIDApi.DTO.Data;
 using RFIDApi.Models.FPS;
 using RFIDApi.Models.System;
 using RFIDApi.Service.Tenant;
+using Microsoft.AspNetCore.Authorization;
+using Azure.Core;
+using RTools_NTS.Util;
 
 namespace FPSHandheld.API.Controllers
 {
@@ -128,6 +131,80 @@ namespace FPSHandheld.API.Controllers
                     Message = $"Error: {ex.Message}"
                 });
             }
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var username = User.FindFirst(ClaimTypes.Name)?.Value;
+                var companyToken = User.FindFirst("CompanyCode")?.Value;
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(companyToken))
+                {
+                    return Unauthorized(new LoginResponse
+                    {
+                        Message = "Invalid username or password"
+                    });
+                }
+                var company = await _sysDbContext._Companies
+                    .FirstOrDefaultAsync(c => c.CompanyCode == companyToken);
+
+                if (company == null) {
+                    return NotFound("Not found company");
+                }
+                // Connect to company database using company-specific credentials
+
+                var conn = _configuration.GetConnectionString(company.CompanyCode);
+
+                var options = new DbContextOptionsBuilder<FPSDbContext>()
+                    .UseSqlServer(conn)
+                    .Options;
+
+
+                using var companyDb = new FPSDbContext(options);
+
+
+                var user = await companyDb.users
+                    .Where(u => u.UserName == username)
+                    .Select(u => new UserInfo
+                    {
+                        UserName = u.UserName,
+                        FullName = u.UserName,
+                        CompanyCode = company.CompanyCode,
+                        CompanyName = company.CompanyName
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    return Unauthorized();
+                }
+
+
+                return Ok(new LoginResponse
+                {
+                    Success = true,
+                    Message = "Login successful",
+                    Token = "",
+                    User = new UserInfo
+                    {
+                        UserName = user.UserName,
+                        FullName = user.UserName,
+                        CompanyCode = company.CompanyCode,
+                        CompanyName = company.CompanyName
+                    }
+                });
+            }
+            catch (Exception ex) {
+                return Unauthorized(new LoginResponse
+                {
+                    Message = "Invalid username or password"
+                });
+            }
+ 
         }
 
         private string GenerateJwtToken(FPS_User user, SYS_Company company)

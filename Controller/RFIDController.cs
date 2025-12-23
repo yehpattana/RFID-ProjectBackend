@@ -13,6 +13,8 @@ using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Concurrent;
 using RFIDApi.Models.Context;
+using Microsoft.AspNetCore.Authorization;
+using Azure;
 namespace RFIDApi.controller
 {
     [Route("rfidApi/[controller]")]
@@ -37,6 +39,7 @@ namespace RFIDApi.controller
             _scopeFactory = scopeFactory;
         }
 
+        [Authorize]
         [HttpPost("StartReading")]
         public async void StartReading([FromBody]string IPconf)
         {
@@ -80,6 +83,32 @@ namespace RFIDApi.controller
             Debug.WriteLine($"RFID Has Stop"); // Log ไป Console
         }
 
+        [HttpGet("CheckEPC/{epc}")]
+        public async Task<IActionResult> CheckEPC(string epc)
+        {
+            try
+            {
+
+                var existTag = await _fbContext.warehouseRFIDs
+                    .FirstOrDefaultAsync(t => t.RFID == epc);
+
+                var stockOut = await _fbContext.warehouseTransections.FirstOrDefaultAsync(t => t.RFId == epc && t.OutStatus);
+                bool isFound = false;
+                bool isOut = false;
+                if (existTag != null)
+                {
+                    isFound = true;
+                }
+                if (existTag != null && stockOut != null)
+                {
+                    isOut = true;
+                }
+                return Ok(new {isOut,isFound, sku = existTag != null ? existTag.SKU : null, });
+            }
+            catch (Exception ex) { 
+                return BadRequest(ex.Message);
+            }
+        }
 
         void IAsynchronousMessage.EventUpload(CallBackEnum type, object param)
         {
@@ -101,22 +130,7 @@ namespace RFIDApi.controller
                     {
                         return;
                     }
-                    var context = scope.ServiceProvider.GetRequiredService<RFIDDbContext>();
-                    var fpsContext = scope.ServiceProvider.GetRequiredService<FPSDbContext>();
-                    var existTag = await context.ProductsRFID
-                        .FirstOrDefaultAsync(t => t.RFID == tag.EPC);
 
-                    var stockOut = await fpsContext.warehouseTransections.FirstOrDefaultAsync(t => t.RFId == tag.EPC && t.OutStatus);
-                    bool isFound = false;
-                    bool isOut = false;
-                    if (existTag != null) 
-                    {
-                        isFound = true;
-                    }
-                    if (existTag != null && stockOut != null) 
-                    {
-                        isOut = true;
-                    }
                     var newTag = new RFIDTag
                     {
                         EPC = tag.EPC,
@@ -124,9 +138,7 @@ namespace RFIDApi.controller
                         Reader_Name = tag.ReaderName,
                         ANT_NUM = tag.ANT_NUM,
                         ReadTime = DateTime.Now,
-                        sku = existTag != null ? existTag.SKU : null,
-                        isFound = isFound,
-                        isOut = isOut
+
                     };
 
                     await _hubContext.Clients.All.SendAsync("ReceiveRFIDData", newTag);

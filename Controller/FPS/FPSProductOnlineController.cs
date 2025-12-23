@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RFIDApi.Service.Interface;
 
@@ -15,6 +16,7 @@ namespace RFIDApi.Controller.FPS
             _service = service;
         }
 
+        [Authorize]
         [HttpGet("Gets")]
         public async Task<IActionResult> Gets()
         {
@@ -29,6 +31,7 @@ namespace RFIDApi.Controller.FPS
             }
         }
 
+        [Authorize]
         [HttpGet("GetWithDetail")]
         public async Task<IActionResult> GetWithDetail()
         {
