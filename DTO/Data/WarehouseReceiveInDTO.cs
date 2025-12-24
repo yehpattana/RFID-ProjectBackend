@@ -1,4 +1,6 @@
-﻿namespace RFIDApi.DTO.Data
+﻿using RFIDApi.Models.FPS;
+
+namespace RFIDApi.DTO.Data
 {
     public class WarehouseReceiveInDTO
     {
@@ -12,6 +14,7 @@
         public string? warehouse { get; set; }
         public string? createdBy { get; set; }
         public string? remark { get; set; }
+        public List<FPSWarehouseTransection>? transactions { get;set; }
         public List<RFIDPOList>? rfidlist { get; set; }
     }
 }

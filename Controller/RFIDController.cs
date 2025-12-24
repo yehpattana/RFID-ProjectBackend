@@ -120,32 +120,30 @@ namespace RFIDApi.controller
             throw new NotImplementedException();
         }
 
-        async void IAsynchronousMessage.OutPutTags(Tag_Model tag)
+        void IAsynchronousMessage.OutPutTags(Tag_Model tag)
         {
             try
             {
-                using (var scope = _scopeFactory.CreateScope())
+                if (!ShouldAccept(tag.EPC))
                 {
-                    if (!ShouldAccept(tag.EPC))
-                    {
-                        return;
-                    }
-
-                    var newTag = new RFIDTag
-                    {
-                        EPC = tag.EPC,
-                        RSSI = tag.RSSI_dB,
-                        Reader_Name = tag.ReaderName,
-                        ANT_NUM = tag.ANT_NUM,
-                        ReadTime = DateTime.Now,
-
-                    };
-
-                    await _hubContext.Clients.All.SendAsync("ReceiveRFIDData", newTag);
-
-                    //Debug.WriteLine($"Tag detected and sent to clients: {json}");
-                    displayedEpcs.Add(tag.EPC);
+                    return;
                 }
+
+                var newTag = new RFIDTag
+                {
+                    EPC = tag.EPC,
+                    RSSI = tag.RSSI_dB,
+                    Reader_Name = tag.ReaderName,
+                    ANT_NUM = tag.ANT_NUM,
+                    ReadTime = DateTime.Now,
+
+                };
+
+                //await Task.Delay(0);
+                //await _hubContext.Clients.All.SendAsync("ReceiveRFIDData", newTag);
+                RfidSignalRQueue.SignalChannel.Writer.TryWrite(newTag);
+                //Debug.WriteLine($"Tag detected and sent to clients: {json}");
+                displayedEpcs.Add(tag.EPC);
             }
             catch (Exception ex)
             {

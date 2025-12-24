@@ -65,10 +65,14 @@ namespace RFIDApi.Service.FPSService
                         ColorCode = b.ColorCode,
                         Size = b.Size,
                         ReceiveNo = a.ReceiveNo,
-                        ReceiveDate = a.ReceiveDate,
+                        ReceiveDate = c.ReceiveDate.HasValue
+                                      ? DateTime.SpecifyKind(c.ReceiveDate.Value, DateTimeKind.Utc)
+                                      : null,
                         InType = a.InType,
                         InvoiceNo = c.InvoiceNo,
-                        InvoiceDate = c.InvoiceDate,
+                        InvoiceDate = c.InvoiceDate.HasValue
+                                      ? DateTime.SpecifyKind(c.InvoiceDate.Value, DateTimeKind.Utc)
+                                      : null,
                         PONo = b.PONo,
                         UOM = b.UOM,
                         OutStatus = a.OutStatus,

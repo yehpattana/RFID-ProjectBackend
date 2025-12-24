@@ -26,5 +26,6 @@
         public string? uom { get; set; }
         public string? sku { get; set; }
         public string? barcode { get; set; }
+        public bool? Status { get; set; }
     }
 }

@@ -296,6 +296,7 @@ namespace RFIDApi.Service.FPSService
                     select new
                     {
                         Receive = r,
+                        Transaction = t,
                         RFID = rf
                     }
                 )
@@ -303,12 +304,16 @@ namespace RFIDApi.Service.FPSService
                 .Select(g => new WarehouseReceiveInDTO
                 {
                     receiveNo = g.Key,
-                    receiveDate = g.First().Receive.ReceiveDate,
+                    receiveDate = g.First().Receive.ReceiveDate.HasValue
+                                    ? DateTime.SpecifyKind(g.First().Receive.ReceiveDate.Value, DateTimeKind.Utc)
+                                    : null,
                     receiveType = g.First().Receive.ReceiveType,
                     companyCode = g.First().Receive.CompanyCode,
                     deliveryNo = g.First().Receive.DeliveryNo,
                     invoiceNo = g.First().Receive.InvoiceNo,
-                    invoiceDate = g.First().Receive.InvoiceDate,
+                    invoiceDate = g.First().Receive.InvoiceDate.HasValue
+                                    ? DateTime.SpecifyKind(g.First().Receive.InvoiceDate.Value, DateTimeKind.Utc)
+                                    : null,
                     warehouse = g.First().Receive.Warehouse,
                     createdBy = g.First().Receive.InputBy,
                     remark = g.First().Receive.Remark,
@@ -324,7 +329,10 @@ namespace RFIDApi.Service.FPSService
                             colorCode = x.RFID.ColorCode,
                             size = x.RFID.Size,
                             uom = x.RFID.UOM,
-                            sku = x.RFID.SKU
+                            sku = x.RFID.SKU,
+                            Status = x.Transaction != null
+                            ? x.Transaction.OutStatus
+                            : null
                         })
                         .ToList()
                 })

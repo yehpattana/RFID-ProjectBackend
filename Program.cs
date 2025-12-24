@@ -10,6 +10,7 @@ using RFIDApi.Models.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using RFIDApi.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IWarehouseInOutTypeService, WarehouseInOutTypeService
 builder.Services.AddScoped<IPODetailService, PODetailService>();
 builder.Services.AddScoped<IPODescService, PODescService>();
 builder.Services.AddScoped<IWarehouseTransactionService, WarehouseTransactionService>();
+builder.Services.AddHostedService<RfidSignalRDispatcher>();
 // เพิ่ม SignalR
 // เพิ่ม DbContext
 builder.Services.AddDbContext<RFIDDbContext>(options =>
@@ -119,7 +121,6 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-
 // ใช้ CORS
 app.UseCors("AllowAllWithCredentials");
 
