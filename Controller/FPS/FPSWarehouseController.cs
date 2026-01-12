@@ -50,14 +50,15 @@ namespace RFIDApi.Controller.FPS
                 var result = await _service.AutoRunReceiveInNo(company);
                 return Ok(result);
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 return BadRequest(ex.Message);
             }
         }
 
         [Authorize]
         [HttpPost("CreateReceiveInNo")]
-        public async Task<IActionResult> CreateReceiveNo([FromBody]CreateWarehouseReceiveInDTO req)
+        public async Task<IActionResult> CreateReceiveNo([FromBody] CreateWarehouseReceiveInDTO req)
         {
             try
             {
@@ -72,11 +73,11 @@ namespace RFIDApi.Controller.FPS
 
         [Authorize]
         [HttpPut("UpdateReceiveInNo/{receiveNo}")]
-        public async Task<IActionResult> UpdateReceiveInNo(string receiveNo,[FromBody]CreateWarehouseReceiveInDTO req)
+        public async Task<IActionResult> UpdateReceiveInNo(string receiveNo, [FromBody] CreateWarehouseReceiveInDTO req)
         {
             try
             {
-                var result = await _service.UpdateWarehouseReceive(receiveNo,req);
+                var result = await _service.UpdateWarehouseReceive(receiveNo, req);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -93,11 +94,14 @@ namespace RFIDApi.Controller.FPS
             {
                 var result = await _service.DeleteWarehouseReceive(receiveNo);
                 return Ok(result);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
+        
+        // OutStock
 
         [Authorize]
         [HttpGet("GetReceiveByNo/{receiveNo}")]
@@ -108,7 +112,7 @@ namespace RFIDApi.Controller.FPS
                 var res = await _service.GetReceiveIns(receiveNo);
                 return Ok(res);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -129,5 +133,98 @@ namespace RFIDApi.Controller.FPS
                 return BadRequest($"{ex.Message}");
             }
         }
+
+        [Authorize]
+        [HttpGet("GetWarehouseRequestOut")]
+        public async Task<IActionResult> GetWarehouseRequestOut()
+        {
+            try
+            {
+                var res = await _service.GetWarehouseRequestOut();
+                if(res.IsSuccess == false)
+                {
+                    return BadRequest(res);
+                }
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpPost("CreateRequestOutstock")]
+        public async Task<IActionResult> CreateRequestOutstock([FromBody] WarehouseOutstockDTO req)
+        {
+            try
+            {
+                var result = await _service.CreateRequestOutstock(req);
+                if (result.IsSuccess == false)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("UpdateRequestOutstock/{outNo}")]
+        public async Task<IActionResult> CreateRequestOutstock(string outNo,[FromBody] WarehouseOutstockDTO req)
+        {
+            try
+            {
+                var result = await _service.UpdateRequestOutstock(outNo,req);
+                if(result.IsSuccess == false)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("DeleteRequestOutstock/{outNo}")]
+        public async Task<IActionResult> DeleteRequestOutstock(string outNo)
+        {
+            try
+            {
+                var result = await _service.DeleteRequestOutstock(outNo);
+                if (result.IsSuccess == false)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("AutoRunOutNo/{company}")]
+
+        public async Task<IActionResult> GetAutoRunOutNo(string company)
+        {
+            try
+            {
+                var result = await _service.AutoRunOutNo(company);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

@@ -9,5 +9,6 @@ namespace RFIDApi.Service.Interface
 
         Task<ResponseDTO<List<Purchase_PODesc>>> Options();
         Task<ResponseDTO<Purchase_PODesc>> GetById(string poNo);
+        Task<ResponseDTO<List<Purchase_PODesc>>> OutOptions();
     }
 }

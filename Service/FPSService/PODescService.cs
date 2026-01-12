@@ -57,6 +57,26 @@ namespace RFIDApi.Service.FPSService
                 return ResponseFactory<Purchase_PODesc>.Failed(ex.Message);
             }
         }
+        public async Task<ResponseDTO<List<Purchase_PODesc>>> OutOptions()
+        {
+            try
+            {
+                var fromDate = DateTime.Now.AddDays(-200);
 
+                var res = await _context.purchase_PODescs
+                    .Where(t =>
+                        t.POType == 3 &&
+                        t.CloseStatus == false &&
+                        t.PODate >= fromDate
+                    )
+                    .ToListAsync();
+
+                return ResponseFactory<List<Purchase_PODesc>>.Ok("Success", res);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<Purchase_PODesc>>.Failed(ex.Message);
+            }
+        }
     }
 }

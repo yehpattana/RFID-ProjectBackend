@@ -25,7 +25,21 @@ namespace RFIDApi.Service.FPSService
             {
                 var res = await _fpsContext.masterProductOnlines.ToListAsync();
 
-                return ResponseFactory<List<MasterProductOnline>>.Ok("Success",res);
+                return ResponseFactory<List<MasterProductOnline>>.Ok("Success", res);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<MasterProductOnline>>.Failed(ex.Message);
+            }
+        }
+
+        public async Task<ResponseDTO<List<MasterProductOnline>>> Options()
+        {
+            try
+            {
+                var res = await _fpsContext.masterProductOnlines.ToListAsync();
+
+                return ResponseFactory<List<MasterProductOnline>>.Ok("Success", res);
             }
             catch (Exception ex)
             {
@@ -90,6 +104,44 @@ namespace RFIDApi.Service.FPSService
                 return ResponseFactory<List<ProductTransactionResult>>.Failed(ex.Message);
             }
         }
+
+        public async Task<ResponseDTO<List<WarehouseTransactionCheckOutRequest>>> GetCheckDetail(string itemCode, string colorCode, string size)
+        {
+            try
+            {
+                var result = await (
+                    from a in _fpsContext.warehouseTransections
+                    join b in _fpsContext.warehouseRFIDs
+                        on a.RFId equals b.RFID
+                    where a.OutStatus == true
+                       && b.ItemCode == itemCode
+                       && b.ColorCode == colorCode
+                       && b.Size == size
+                    group a by new
+                    {
+                        b.ItemCode,
+                        b.ColorCode,
+                        b.Size,
+                        b.UOM
+                    }
+                    into g
+                    select new WarehouseTransactionCheckOutRequest
+                    {
+                        ItemCode = g.Key.ItemCode,
+                        ColorCode = g.Key.ColorCode,
+                        Size = g.Key.Size,
+                        UOM = g.Key.UOM,
+                        BalanceQty = g.Count()
+                    }
+                ).ToListAsync();
+
+                return ResponseFactory<List<WarehouseTransactionCheckOutRequest>>.Ok("Success", result);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<WarehouseTransactionCheckOutRequest>>.Failed(ex.Message);
+            }
+        }
         public async Task<ResponseDTO<MasterProductOnline>> Get(string warehouse)
         {
             try
@@ -99,6 +151,19 @@ namespace RFIDApi.Service.FPSService
             catch (Exception ex)
             {
                 return ResponseFactory<MasterProductOnline>.Failed(ex.Message);
+            }
+        }
+
+        public async Task<ResponseDTO<string>> GetUOM(string itemCode, string colorCode, string size)
+        {
+            try
+            {
+                var res = await _fpsContext.masterProductOnlines.FirstOrDefaultAsync(x => x.ItemCode == itemCode && x.ColorCode == colorCode && x.Size == size);
+                return ResponseFactory<string>.Ok("success", res.UOM);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<string>.Failed(ex.Message);
             }
         }
     }

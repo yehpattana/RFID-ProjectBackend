@@ -23,6 +23,7 @@ namespace RFIDApi.Models.Context
             modelBuilder.Entity<WarehouseInOutType>().HasKey(p => new { p.InoutType, p.TranType });
             modelBuilder.Entity<Purchase_PODetail>().HasKey(p => new { p.PRNo, p.ItemNo, p.DlvCode, p.CustomerPO, p.Size });
             modelBuilder.Entity<FPSWarehouseTransection>().HasKey(p => new { p.ReceiveNo, p.RFId });
+            modelBuilder.Entity<WarehouseRequestOutDetail>().HasKey(p => new { p.OutNo, p.ItemCode, p.ColorCode, p.Size });
 
             modelBuilder.Entity<MasterProductOnline>().HasMany(p => p.WarehouseRFIDs).WithOne(w => w.MasterProductOnline).HasForeignKey(f => new { f.ItemCode, f.Size, f.ColorCode, f.CompanyCode });
             // Entities relation with transaction
@@ -60,5 +61,8 @@ namespace RFIDApi.Models.Context
         }
 
         public DbSet<FPS_User> users { get; set; }
+
+        public DbSet<WarehouseRequestOutMain> warehouseRequestOutMains { get; set; }
+        public DbSet<WarehouseRequestOutDetail> warehouseRequestOutDetails { get; set; }
     }
 }

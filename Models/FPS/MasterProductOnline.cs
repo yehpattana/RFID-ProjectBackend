@@ -14,6 +14,7 @@ namespace RFIDApi.Models.FPS
         public string SKU { get; set; }
         public string? ProductBarcode { get; set; }
         public bool UseGS1 { get; set; }
+        public string? UOM { get; set; }
         public string CreateBy { get; set; }
         public DateTime CreateDate { get; set; }
         public string EditBy { get; set; }

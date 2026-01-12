@@ -30,5 +30,20 @@ namespace RFIDApi.Controller.FPS
                 return BadRequest(result);
             }
         }
+
+        [Authorize]
+        [HttpGet("OutOptions")]
+        public async Task<IActionResult> OutOptions()
+        {
+            var result = await _service.OutOptions();
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
     }
 }

@@ -7,6 +7,8 @@ namespace RFIDApi.Service.Interface
     {
         Task<ResponseDTO<List<WarehouseInOutType>>> Gets();
         Task<ResponseDTO<WarehouseInOutType>> Get(string keyword);
-        
+
+        Task<ResponseDTO<List<WarehouseInOutType>>> OutOptions();
+
     }
 }

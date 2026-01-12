@@ -73,10 +73,10 @@ namespace RFIDApi.Service.FPSService
 
 
                 return ResponseFactory<List<WarehouseRFID>>.Ok("Success", res);
-                
+
             }
-            catch (Exception ex) 
-            { 
+            catch (Exception ex)
+            {
                 return ResponseFactory<List<WarehouseRFID>>.Failed(ex.Message);
             }
         }
@@ -105,7 +105,7 @@ namespace RFIDApi.Service.FPSService
             try
             {
 
-                if(req == null)
+                if (req == null)
                 {
                     return ResponseFactory<object>.Failed("Request is null");
                 }
@@ -130,7 +130,7 @@ namespace RFIDApi.Service.FPSService
                 var res = await _fpsContext.warehouseReceives.AddAsync(newData);
 
                 List<FPSWarehouseTransection> tranList = new List<FPSWarehouseTransection>();
-                foreach(var item in req.rfidlist)
+                foreach (var item in req.rfidlist)
                 {
                     //@RFId,
                     //@ReceiveNo,
@@ -141,7 +141,7 @@ namespace RFIDApi.Service.FPSService
                     //@ItemCode,
                     //@ColorCode,
                     //@Size
-                    if(newData.ReceiveType == "Purchase")
+                    if (newData.ReceiveType == "Purchase")
                     {
                         var sql = @"
                         EXEC sp_WarehouseRegisterRFId 
@@ -200,7 +200,7 @@ namespace RFIDApi.Service.FPSService
             {
                 var existData = await _fpsContext.warehouseReceives.FirstOrDefaultAsync(t => t.ReceiveNo == receiveNo);
 
-                if(existData == null)
+                if (existData == null)
                 {
                     return ResponseFactory<object>.Failed("Not found receive No");
                 }
@@ -214,7 +214,7 @@ namespace RFIDApi.Service.FPSService
                 existData.EditBy = req.createdBy ?? "system";
                 existData.EditDate = DateTime.Now;
 
-                foreach(var item in req.rfidlist)
+                foreach (var item in req.rfidlist)
                 {
                     var exist = await _fpsContext.warehouseTransections.FirstOrDefaultAsync(t => t.RFId == item.rfid && t.ReceiveNo == existData.ReceiveNo);
                     if (exist != null)
@@ -249,18 +249,21 @@ namespace RFIDApi.Service.FPSService
                 var existRec = await _fpsContext.warehouseReceives.Where(t => t.ReceiveNo.Equals(receiveNo)).FirstOrDefaultAsync();
                 var existTran = await _fpsContext.warehouseTransections.Where(t => t.ReceiveNo.Equals(receiveNo)).ToListAsync();
 
-                if (existRec == null) {
+                if (existRec == null)
+                {
                     return ResponseFactory<object>.Failed("Not found receive packing list data");
                 }
                 var hasOutRfid = await _fpsContext.warehouseTransections
                     .AnyAsync(t => t.ReceiveNo == receiveNo && t.OutStatus);
-                if (hasOutRfid) {
+                if (hasOutRfid)
+                {
                     return ResponseFactory<object>.Failed("Have rfid is out from stock");
                 }
                 _fpsContext.RemoveRange(existRec);
                 _fpsContext.RemoveRange(existTran);
 
-                if(existRec.ReceiveType == "Purchase"){
+                if (existRec.ReceiveType == "Purchase")
+                {
                     var sql = @"
                             EXEC 
                             sp_WarehouseDeleteRFId 
@@ -279,7 +282,7 @@ namespace RFIDApi.Service.FPSService
                 return ResponseFactory<object>.Failed(ex.Message);
             }
         }
-        public async Task<ResponseDTO<List<WarehouseReceiveInDTO>>> GetReceiveIns(string ReceiveNo) 
+        public async Task<ResponseDTO<List<WarehouseReceiveInDTO>>> GetReceiveIns(string ReceiveNo)
         {
             try
             {
@@ -341,8 +344,235 @@ namespace RFIDApi.Service.FPSService
 
                 return ResponseFactory<List<WarehouseReceiveInDTO>>.Ok("Success", result);
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 return ResponseFactory<List<WarehouseReceiveInDTO>>.Failed(ex.Message);
+            }
+        }
+
+        // OutStock
+        public async Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetWarehouseRequestOut()
+        {
+            try
+            {
+                var result = await (
+                    from m in _fpsContext.warehouseRequestOutMains
+                    join d in _fpsContext.warehouseRequestOutDetails
+                        on m.OutNo equals d.OutNo into md
+                    from d in md.DefaultIfEmpty()   // ✅ LEFT JOIN
+                    select new WarehouseRequestOutMergeDTO
+                    {
+                        // ===== Main =====
+                        OutNo = m.OutNo,
+                        RequestDate = m.RequestDate,
+                        RequestBy = m.RequestBy,
+                        OutType = m.OutType,
+                        CreateBy = m.CreateBy,
+                        CreateDate = m.CreateDate,
+                        EditBy = m.EditBy,
+                        EditDate = m.EditDate,
+
+                        // ===== Detail =====
+                        ItemCode = d != null ? d.ItemCode : null,
+                        ColorCode = d != null ? d.ColorCode : null,
+                        Size = d != null ? d.Size : null,
+                        OutQty = d != null ? d.OutQty : null,
+                        UOM = d != null ? d.UOM : null,
+                        OutStatus = d != null ? d.OutStatus : null
+                    }
+                ).ToListAsync();
+                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Failed(ex.Message);
+            }
+        }
+        public async Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetWarehouseRequestOutByOutNo(string OutNo)
+        {
+            try
+            {
+                var result = await (
+                    from m in _fpsContext.warehouseRequestOutMains
+                    join d in _fpsContext.warehouseRequestOutDetails
+                        on m.OutNo equals d.OutNo into md
+                    from d in md.DefaultIfEmpty()   // ✅ LEFT JOIN
+                    where m.OutNo == OutNo
+                    select new WarehouseRequestOutMergeDTO
+                    {
+                        // ===== Main =====
+                        OutNo = m.OutNo,
+                        RequestDate = m.RequestDate,
+                        RequestBy = m.RequestBy,
+                        OutType = m.OutType,
+                        CreateBy = m.CreateBy,
+                        CreateDate = m.CreateDate,
+                        EditBy = m.EditBy,
+                        EditDate = m.EditDate,
+
+                        // ===== Detail =====
+                        ItemCode = d != null ? d.ItemCode : null,
+                        ColorCode = d != null ? d.ColorCode : null,
+                        Size = d != null ? d.Size : null,
+                        OutQty = d != null ? d.OutQty : null,
+                        UOM = d != null ? d.UOM : null,
+                        OutStatus = d != null ? d.OutStatus : null
+                    }
+                ).ToListAsync();
+                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Failed(ex.Message);
+            }
+        }
+
+        public async Task<ResponseDTO<string>> AutoRunOutNo(string company)
+        {
+            try
+            {
+                var result = _fpsContext.Set<GenReceiveNoResultDTO>()
+                    .FromSqlRaw("EXEC sp_GenInventoryDocNo {0}, {1}", company, "RQO")
+                    .AsEnumerable()  // ← บังคับให้ผลลัพธ์มาอยู่ใน memory ก่อน
+                    .FirstOrDefault();
+
+
+                return ResponseFactory<string>.Ok("Success", result.DocNo);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<string>.Failed(ex.Message);
+            }
+        }
+        public async Task<ResponseDTO<object>> CreateRequestOutstock(WarehouseOutstockDTO req)
+        {
+            using var transaction = await _fpsContext.Database.BeginTransactionAsync();
+            try
+            {
+                if(req.Header == null)
+                {
+                    return ResponseFactory<object>.Failed("Request Main is null");
+                }
+
+                if(req.Items.Count == 0 || req.Items== null)
+                {
+                    return ResponseFactory<object>.Failed("Request Detail is null");
+                }
+
+                var newMain = new WarehouseRequestOutMain
+                {
+                    OutNo = req.Header.RequestNo,
+                    RequestDate = req.Header.RequestDate,
+                    RequestBy = req.Header.RequestBy,
+                    OutType = req.Header.OutType,
+                    CreateBy = req.Header.RequestBy,
+                    CreateDate = DateTime.Now,
+                    EditBy = req.Header.CreateBy ?? "System",
+                    EditDate = DateTime.Now,
+                };
+
+                List<WarehouseRequestOutDetail> detailList = new List<WarehouseRequestOutDetail>();
+                foreach (var item in req.Items)
+                {
+                    var newDetail = new WarehouseRequestOutDetail
+                    {
+                        OutNo = req.Header.RequestNo,
+                        ItemCode = item.ProductCode,
+                        ColorCode = item.Color,
+                        Size = item.Size,
+                        OutQty = item.Qty,
+                        UOM = item.Uom,
+                        OutStatus = false,
+                    };
+
+                    detailList.Add(newDetail);
+                }
+
+                await _fpsContext.warehouseRequestOutMains.AddAsync(newMain);
+                await _fpsContext.warehouseRequestOutDetails.AddRangeAsync(detailList);
+                await _fpsContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return ResponseFactory<object>.Ok("Success");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ResponseFactory<object>.Failed(ex.Message);
+            }
+        }
+        public async Task<ResponseDTO<object>> UpdateRequestOutstock(string requestOutNo, WarehouseOutstockDTO req)
+        {
+            using var transaction = await _fpsContext.Database.BeginTransactionAsync();
+            try
+            {
+                var existData = await _fpsContext.warehouseRequestOutMains.FirstOrDefaultAsync(t => t.OutNo == requestOutNo);
+                if (existData == null)
+                {
+                    return ResponseFactory<object>.Failed("Not found request outstock No");
+                }
+
+                existData.RequestDate = req.Header.RequestDate;
+                existData.RequestBy = req.Header.RequestBy;
+                existData.OutType = req.Header.OutType;
+                existData.EditBy = req.Header.CreateBy ?? "System";
+                existData.EditDate = DateTime.Now;
+
+                var existDetails = await _fpsContext.warehouseRequestOutDetails
+                    .Where(t => t.OutNo == requestOutNo)
+                    .ToListAsync();
+
+                _fpsContext.warehouseRequestOutDetails.RemoveRange(existDetails);
+
+                List<WarehouseRequestOutDetail> detailList = new List<WarehouseRequestOutDetail>();
+                foreach (var item in req.Items) {
+                    var newDetail = new WarehouseRequestOutDetail
+                    {
+                        OutNo = requestOutNo,
+                        ItemCode = item.ProductCode,
+                        ColorCode = item.Color,
+                        Size = item.Size,
+                        OutQty = item.Qty,
+                        UOM = item.Uom,
+                        OutStatus = false,
+                    };
+
+                    detailList.Add(newDetail);
+                }
+
+                await _fpsContext.warehouseRequestOutDetails.AddRangeAsync(detailList);
+                await _fpsContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return ResponseFactory<object>.Ok("Success");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ResponseFactory<object>.Failed(ex.Message);
+            }
+        }
+        public async Task<ResponseDTO<object>> DeleteRequestOutstock(string requestOutNo)
+        {
+            using var transaction = await _fpsContext.Database.BeginTransactionAsync();
+            try
+            {
+                var existMain = await _fpsContext.warehouseRequestOutMains.Where(t => t.OutNo.Equals(requestOutNo)).FirstOrDefaultAsync();
+                var existDetail = await _fpsContext.warehouseRequestOutDetails.Where(t => t.OutNo.Equals(requestOutNo)).ToListAsync();
+
+                if (existMain == null)
+                {
+                    return ResponseFactory<object>.Failed("Not found request outstock data");
+                }
+                _fpsContext.RemoveRange(existDetail);
+                _fpsContext.RemoveRange(existMain);
+
+                await _fpsContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return ResponseFactory<object>.Ok("Success");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ResponseFactory<object>.Failed(ex.Message);
             }
         }
     }

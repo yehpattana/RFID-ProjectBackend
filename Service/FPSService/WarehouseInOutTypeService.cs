@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using RFIDApi.DTO;
 using RFIDApi.Helper;
 using RFIDApi.Models.Context;
@@ -40,6 +41,20 @@ namespace RFIDApi.Service.FPSService
             catch (Exception ex)
             {
                 return ResponseFactory<WarehouseInOutType>.Failed(ex.Message);
+            }
+        }
+
+        
+        public async Task<ResponseDTO<List<WarehouseInOutType>>> OutOptions()
+        {
+            try
+            {
+                var res = await _fpsContext.warehouseInOutTypes.Where(t => t.TranType == "Out" && t.InoutType != "Move").ToListAsync();
+                return ResponseFactory<List<WarehouseInOutType>>.Ok("Success", res);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<WarehouseInOutType>>.Failed(ex.Message);
             }
         }
     }

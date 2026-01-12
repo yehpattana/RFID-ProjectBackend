@@ -15,6 +15,7 @@ using System.Collections.Concurrent;
 using RFIDApi.Models.Context;
 using Microsoft.AspNetCore.Authorization;
 using Azure;
+using RFIDApi.DTO.Data;
 namespace RFIDApi.controller
 {
     [Route("rfidApi/[controller]")]
@@ -106,6 +107,31 @@ namespace RFIDApi.controller
                 return Ok(new {isOut,isFound, sku = existTag != null ? existTag.SKU : null, });
             }
             catch (Exception ex) { 
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("CheckEPCOutStock/{epc}")]
+        public async Task<IActionResult> CheckEPCOutStock(string epc, ScanOutStockRequestDto req)
+        {
+            try
+            {
+
+                var existTag = await _fbContext.warehouseRFIDs
+                    .FirstOrDefaultAsync(t => t.RFID == epc);
+
+                var inStock = await _fbContext.warehouseRFIDs.FirstOrDefaultAsync(t => t.RFID == epc);
+                bool isFound = false;
+                bool isOut = false;
+
+                if(existTag != null && existTag.ColorCode == req.Color && existTag.Size == req.Size && existTag.ItemCode == req.ProductCode && inStock != null)
+                {
+                    isFound = true;
+                }
+                return Ok(new { isOut, isFound, sku = existTag != null ? existTag.SKU : null, });
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(ex.Message);
             }
         }
