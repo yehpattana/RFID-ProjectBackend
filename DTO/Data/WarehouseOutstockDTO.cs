@@ -24,6 +24,7 @@ namespace RFIDApi.DTO.Data
         public string RequestBy { get; set; } = null!;
         public string OutType { get; set; } = null!;
         public string CreateBy { get; set; } = null!;
+        public string? PONo { get; set; }
         public DateTime CreateDate { get; set; }
         public string EditBy { get; set; } = null!;
         public DateTime EditDate { get; set; }
@@ -43,6 +44,7 @@ namespace RFIDApi.DTO.Data
         public string OutType { get; set; } = string.Empty;   // from Warehouse_InoutType
         public string RequestBy { get; set; } = string.Empty; // user login
         public string? OutsourcePONo { get; set; }             // optional (POType = 3)
+        public string? PONo { get; set; }
         public string? CreateBy { get; set; }
     }
 
@@ -72,5 +74,23 @@ namespace RFIDApi.DTO.Data
         public string? Size { get; set; }
 
         public decimal OutQty { get; set; }
+    }
+
+
+    public class CreateWarehouseOutDTO
+    {
+        public string outNo { get; set; }
+        public DateTime? outDate { get; set; }
+        public string? outType { get; set; }
+        public string? productCode { get; set; }
+        public string? colorCode { get; set; }
+        public string? size { get; set; }
+        public int outQty { get; set; }
+        public List<RFIDListDTO>? rfidlist { get; set; }
+    }
+
+    public class RFIDListDTO
+    {
+        public string rfid { get; set; }
     }
 }

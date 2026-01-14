@@ -11,6 +11,7 @@ namespace RFIDApi.Service.Interface
         Task<ResponseDTO<MasterWarehouse>> Get(string warehouse);
         Task<ResponseDTO<List<WarehouseReceiveInDTO>>> GetReceiveIns(string ReceiveNo);
         Task<ResponseDTO<List<WarehouseRFID>>> GetWarehouseRFID ();
+        Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetListRequestOutstock();
         Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetWarehouseRequestOut();
         Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetWarehouseRequestOutByOutNo(string OutNo);
         Task<ResponseDTO<string>> AutoRunReceiveInNo(string company);
@@ -21,5 +22,8 @@ namespace RFIDApi.Service.Interface
         Task<ResponseDTO<object>> CreateRequestOutstock(WarehouseOutstockDTO req);
         Task<ResponseDTO<object>> UpdateRequestOutstock(string requestOutNo, WarehouseOutstockDTO req);
         Task<ResponseDTO<object>> DeleteRequestOutstock(string requestOutNo);
+        Task<ResponseDTO<List<WarehouseRequestOutDetail>>> GetDetailRequest(string requestOutNo);
+
+        Task<ResponseDTO<object>> CreateWarehouseOutstock(CreateWarehouseOutDTO req);
     }
 }

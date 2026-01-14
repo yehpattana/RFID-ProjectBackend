@@ -115,11 +115,11 @@ namespace RFIDApi.Service.FPSService
                     ReceiveNo = req.receiveNo,
                     CompanyCode = req.companyCode,
                     Warehouse = req.warehouse,
-                    ReceiveDate = req.receiveDate,
+                    ReceiveDate = req.receiveDate?.Date,
                     ReceiveType = req.receiveType,
                     DeliveryNo = req.deliveryNo,
                     InvoiceNo = req.invoiceNo,
-                    InvoiceDate = req.invoiceDate,
+                    InvoiceDate = req.invoiceDate?.Date,
                     InputBy = req.createdBy,
                     InputDate = DateTime.Now,
                     EditBy = req.createdBy,
@@ -173,7 +173,7 @@ namespace RFIDApi.Service.FPSService
                         POItemNo = item.poNoItem,
                         UOM = item.uom,
                         InType = newData.ReceiveType,
-                        ReceiveDate = newData.ReceiveDate,
+                        ReceiveDate = newData.ReceiveDate?.Date,
                         OutStatus = false,
                         InputBy = newData.InputBy,
                         InputDate = DateTime.Now,
@@ -205,10 +205,10 @@ namespace RFIDApi.Service.FPSService
                     return ResponseFactory<object>.Failed("Not found receive No");
                 }
 
-                existData.ReceiveDate = req.receiveDate;
+                existData.ReceiveDate = req.receiveDate?.Date;
                 existData.DeliveryNo = req.deliveryNo;
                 existData.InvoiceNo = req.invoiceNo ?? null;
-                existData.InvoiceDate = req.invoiceDate ?? null;
+                existData.InvoiceDate = req.invoiceDate?.Date ?? null;
                 existData.Remark = req.remark ?? null;
                 existData.Warehouse = req.warehouse;
                 existData.EditBy = req.createdBy ?? "system";
@@ -371,7 +371,7 @@ namespace RFIDApi.Service.FPSService
                         CreateDate = m.CreateDate,
                         EditBy = m.EditBy,
                         EditDate = m.EditDate,
-
+                        PONo = m.PONo,
                         // ===== Detail =====
                         ItemCode = d != null ? d.ItemCode : null,
                         ColorCode = d != null ? d.ColorCode : null,
@@ -409,7 +409,7 @@ namespace RFIDApi.Service.FPSService
                         CreateDate = m.CreateDate,
                         EditBy = m.EditBy,
                         EditDate = m.EditDate,
-
+                        PONo = m.PONo,
                         // ===== Detail =====
                         ItemCode = d != null ? d.ItemCode : null,
                         ColorCode = d != null ? d.ColorCode : null,
@@ -417,6 +417,39 @@ namespace RFIDApi.Service.FPSService
                         OutQty = d != null ? d.OutQty : null,
                         UOM = d != null ? d.UOM : null,
                         OutStatus = d != null ? d.OutStatus : null
+                    }
+                ).ToListAsync();
+                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Failed(ex.Message);
+            }
+        }
+        public async Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetListRequestOutstock()
+        {
+            try
+            {
+                var result = await (
+                    from m in _fpsContext.warehouseRequestOutMains
+                    join d in _fpsContext.warehouseRequestOutDetails
+                        on m.OutNo equals d.OutNo into md
+                    from d in md   // ✅ INNER JOIN
+                    where d.OutStatus == false
+                    select new WarehouseRequestOutMergeDTO
+                    {
+                        // ===== Main =====
+                        OutNo = m.OutNo,
+                        RequestDate = m.RequestDate,
+                        RequestBy = m.RequestBy,
+                        OutType = m.OutType,
+
+                        // ===== Detail =====
+                        ItemCode = d != null ? d.ItemCode : null,
+                        ColorCode = d != null ? d.ColorCode : null,
+                        Size = d != null ? d.Size : null,
+                        OutQty = d != null ? d.OutQty : null,
+                        UOM = d != null ? d.UOM : null,
                     }
                 ).ToListAsync();
                 return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
@@ -465,6 +498,7 @@ namespace RFIDApi.Service.FPSService
                     RequestDate = req.Header.RequestDate,
                     RequestBy = req.Header.RequestBy,
                     OutType = req.Header.OutType,
+                    PONo = req.Header.PONo,
                     CreateBy = req.Header.RequestBy,
                     CreateDate = DateTime.Now,
                     EditBy = req.Header.CreateBy ?? "System",
@@ -513,6 +547,7 @@ namespace RFIDApi.Service.FPSService
 
                 existData.RequestDate = req.Header.RequestDate;
                 existData.RequestBy = req.Header.RequestBy;
+                existData.PONo = req.Header.PONo;
                 existData.OutType = req.Header.OutType;
                 existData.EditBy = req.Header.CreateBy ?? "System";
                 existData.EditDate = DateTime.Now;
@@ -564,6 +599,75 @@ namespace RFIDApi.Service.FPSService
                 }
                 _fpsContext.RemoveRange(existDetail);
                 _fpsContext.RemoveRange(existMain);
+
+                await _fpsContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return ResponseFactory<object>.Ok("Success");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return ResponseFactory<object>.Failed(ex.Message);
+            }
+        }
+
+        public async Task<ResponseDTO<List<WarehouseRequestOutDetail>>> GetDetailRequest(string requestOutNo)
+        {
+            try
+            {
+                var res = await _fpsContext.warehouseRequestOutDetails.Where(t => t.OutNo == requestOutNo).ToListAsync();
+
+                return ResponseFactory<List<WarehouseRequestOutDetail>>.Ok("Success", res);
+            }
+            catch(Exception ex)
+            {
+                return ResponseFactory<List<WarehouseRequestOutDetail>>.Failed(ex.Message);
+            }
+        }
+
+        public async Task<ResponseDTO<object>> CreateWarehouseOutstock(CreateWarehouseOutDTO req)
+        {
+            if (req == null)
+            {
+                return ResponseFactory<object>.Failed("Request is null");
+            }
+            using var transaction = await _fpsContext.Database.BeginTransactionAsync();
+            try
+            {
+                var outDetail = await _fpsContext.warehouseRequestOutDetails
+                    .Where(t => t.OutNo == req.outNo && t.ItemCode == req.productCode && t.ColorCode == req.colorCode && t.Size == req.size).ToListAsync();
+
+                if (outDetail == null)
+                {
+                    return ResponseFactory<object>.Failed("Not found request outstock detail");
+                }
+
+                foreach(var item in outDetail)
+                {
+                    item.OutStatus = true;
+                }
+
+                var res = await _fpsContext.warehouseTransections.ToListAsync();
+                var DictionaryRfid = new Dictionary<string, List<FPSWarehouseTransection>>();
+                foreach (var item in res)
+                {
+                    if (!DictionaryRfid.ContainsKey(item.RFId))
+                    {
+                        DictionaryRfid[item.RFId] = new List<FPSWarehouseTransection>();
+                    }
+                    DictionaryRfid[item.RFId].Add(item);
+                }
+                foreach (var item in req.rfidlist)
+                {
+                    var tran = DictionaryRfid.TryGetValue(item.rfid, out var tranList)
+                        ? tranList.FirstOrDefault(t => t.OutStatus == false)
+                        : null;
+                    if (tran != null)
+                    {
+                        tran.OutStatus = true;
+                        tran.OutDate = DateTime.Now.Date;
+                    }
+                }
 
                 await _fpsContext.SaveChangesAsync();
                 await transaction.CommitAsync();

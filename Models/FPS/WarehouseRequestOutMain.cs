@@ -14,7 +14,7 @@ namespace RFIDApi.Models.FPS
         public string RequestBy { get; set; } = null!;      // nvarchar(50) NOT NULL
 
         public string OutType { get; set; } = null!;        // nvarchar(20) NOT NULL
-
+        public string? PONo { get; set; } = null!;            // nvarchar(20) NULL
         public string CreateBy { get; set; } = null!;       // nvarchar(50) NOT NULL
         public DateTime CreateDate { get; set; }            // datetime NOT NULL
 
