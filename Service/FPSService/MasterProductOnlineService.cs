@@ -166,5 +166,56 @@ namespace RFIDApi.Service.FPSService
                 return ResponseFactory<string>.Failed(ex.Message);
             }
         }
+
+        public async Task<ResponseDTO<List<ProductTransactionResult>>> GetOutDetail()
+        {
+            try
+            {
+                var result = await (
+                    from a in _fpsContext.warehouseTransections
+                    join b in _fpsContext.warehouseRFIDs
+                        on a.RFId equals b.RFID into bb
+                    from b in bb.DefaultIfEmpty()
+
+                    join d in _fpsContext.masterProductOnlines
+                        on new { b.ItemCode, b.ColorCode, b.Size, CompanyCode = "FPSTH" }
+                        equals new { d.ItemCode, d.ColorCode, d.Size, d.CompanyCode }
+                        into dd
+                    from d in dd.DefaultIfEmpty()
+
+                    orderby b.ItemCode, b.ColorCode, b.Size, a.RFId
+
+                    select new ProductTransactionResult
+                    {
+                        Warehouse = a.Warehouse,
+                        RFId = a.RFId,
+                        ProductBarcode = d.ProductBarcode,
+                        SKU = b.SKU,
+                        ItemCode = b.ItemCode,
+                        ColorCode = b.ColorCode,
+                        Size = b.Size,
+                        ReceiveNo = a.ReceiveNo,
+
+                        OutType = a.OutType,
+
+                        PONo = b.PONo,
+                        UOM = b.UOM,
+                        OutStatus = a.OutStatus,
+                        OutDate = a.OutDate,
+                        OutNo = a.OutNo,
+                        
+                        InputBy = a.InputBy,
+                        InputDate = a.InputDate
+                    }
+                ).ToListAsync();
+
+                return ResponseFactory<List<ProductTransactionResult>>.Ok("Success", result);
+            }
+            catch (Exception ex)
+            {
+                return ResponseFactory<List<ProductTransactionResult>>.Failed(ex.Message);
+            }
+        }
+
     }
 }

@@ -12,6 +12,6 @@ namespace RFIDApi.Service.Interface
         Task<ResponseDTO<List<WarehouseTransactionCheckOutRequest>>> GetCheckDetail(string itemCode,string colorCode,string size);
         Task<ResponseDTO<MasterProductOnline>> Get(string keyword);
         Task<ResponseDTO<string>> GetUOM(string itemCode, string colorCode,string size);
-
+        Task<ResponseDTO<List<ProductTransactionResult>>> GetOutDetail();
     }
 }

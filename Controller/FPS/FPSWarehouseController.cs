@@ -267,10 +267,10 @@ namespace RFIDApi.Controller.FPS
             {
                 var res = await _service.GetWarehouseRequestOutByOutNo(outNo);
 
-                if(res.IsSuccess == false)
+                if (res.IsSuccess == false)
                 {
                     return BadRequest(res);
-                }  
+                }
                 return Ok(res);
             }
             catch (Exception ex)
@@ -286,6 +286,45 @@ namespace RFIDApi.Controller.FPS
             try
             {
                 var res = await _service.GetDetailRequest(requestOutNo);
+                if (!res.IsSuccess)
+                {
+                    return BadRequest(res);
+                }
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpPost("GetShowRequestOUT")]
+        public async Task<IActionResult> GetShowRequestOUT([FromBody] ShowRequestOutResponseDTO req)
+        {
+            try
+            {
+                var res = await _service.GetShowRequestOUT(req);
+                if (!res.IsSuccess)
+                {
+                    return BadRequest(res);
+                }
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpGet("GetCurrentUser")]
+
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            try
+            {
+                var res = await _service.GetCurrentUser();
                 if (!res.IsSuccess)
                 {
                     return BadRequest(res);

@@ -15,6 +15,7 @@ using RFIDApi.Service;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IMasterWarehouseService,MasterWarehouseService>();
 builder.Services.AddScoped<IMasterProductOnlineService, MasterProductOnlineService>();

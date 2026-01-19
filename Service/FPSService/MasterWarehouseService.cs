@@ -10,6 +10,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Security.Policy;
 using Microsoft.AspNetCore.Mvc;
 using RFIDApi.Models.Context;
+using System.Security.Claims;
 
 namespace RFIDApi.Service.FPSService
 {
@@ -17,10 +18,15 @@ namespace RFIDApi.Service.FPSService
     {
         private readonly FPSDbContext _fpsContext;
         private readonly RFIDDbContext _shopifyContext;
-        public MasterWarehouseService(FPSDbContext fpsContext, RFIDDbContext shopifyContext)
+        private readonly ILogger<MasterWarehouseService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public MasterWarehouseService(FPSDbContext fpsContext, RFIDDbContext shopifyContext,ILogger<MasterWarehouseService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _fpsContext = fpsContext;
             _shopifyContext = shopifyContext;
+            _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
+
         }
 
         public async Task<ResponseDTO<List<MasterWarehouse>>> Gets()
@@ -367,18 +373,13 @@ namespace RFIDApi.Service.FPSService
                         RequestDate = m.RequestDate,
                         RequestBy = m.RequestBy,
                         OutType = m.OutType,
-                        CreateBy = m.CreateBy,
-                        CreateDate = m.CreateDate,
-                        EditBy = m.EditBy,
-                        EditDate = m.EditDate,
-                        PONo = m.PONo,
                         // ===== Detail =====
                         ItemCode = d != null ? d.ItemCode : null,
                         ColorCode = d != null ? d.ColorCode : null,
                         Size = d != null ? d.Size : null,
                         OutQty = d != null ? d.OutQty : null,
                         UOM = d != null ? d.UOM : null,
-                        OutStatus = d != null ? d.OutStatus : null
+
                     }
                 ).ToListAsync();
                 return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
@@ -405,18 +406,13 @@ namespace RFIDApi.Service.FPSService
                         RequestDate = m.RequestDate,
                         RequestBy = m.RequestBy,
                         OutType = m.OutType,
-                        CreateBy = m.CreateBy,
-                        CreateDate = m.CreateDate,
-                        EditBy = m.EditBy,
-                        EditDate = m.EditDate,
-                        PONo = m.PONo,
                         // ===== Detail =====
                         ItemCode = d != null ? d.ItemCode : null,
                         ColorCode = d != null ? d.ColorCode : null,
                         Size = d != null ? d.Size : null,
                         OutQty = d != null ? d.OutQty : null,
                         UOM = d != null ? d.UOM : null,
-                        OutStatus = d != null ? d.OutStatus : null
+                        
                     }
                 ).ToListAsync();
                 return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
@@ -430,28 +426,35 @@ namespace RFIDApi.Service.FPSService
         {
             try
             {
-                var result = await (
-                    from m in _fpsContext.warehouseRequestOutMains
-                    join d in _fpsContext.warehouseRequestOutDetails
-                        on m.OutNo equals d.OutNo into md
-                    from d in md   // ✅ INNER JOIN
-                    where d.OutStatus == false
-                    select new WarehouseRequestOutMergeDTO
-                    {
-                        // ===== Main =====
-                        OutNo = m.OutNo,
-                        RequestDate = m.RequestDate,
-                        RequestBy = m.RequestBy,
-                        OutType = m.OutType,
 
-                        // ===== Detail =====
-                        ItemCode = d != null ? d.ItemCode : null,
-                        ColorCode = d != null ? d.ColorCode : null,
-                        Size = d != null ? d.Size : null,
-                        OutQty = d != null ? d.OutQty : null,
-                        UOM = d != null ? d.UOM : null,
-                    }
-                ).ToListAsync();
+                var result = await _fpsContext
+                    .Set<WarehouseRequestOutMergeDTO>()
+                    .FromSqlRaw("EXEC sp_WarehouseRequestOut")
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                //var result = await (
+                //    from m in _fpsContext.warehouseRequestOutMains
+                //    join d in _fpsContext.warehouseRequestOutDetails
+                //        on m.OutNo equals d.OutNo into md
+                //    from d in md   // ✅ INNER JOIN
+                //    where d.OutStatus == false
+                //    select new WarehouseRequestOutMergeDTO
+                //    {
+                //        // ===== Main =====
+                //        OutNo = m.OutNo,
+                //        RequestDate = m.RequestDate,
+                //        RequestBy = m.RequestBy,
+                //        OutType = m.OutType,
+
+                //        // ===== Detail =====
+                //        ItemCode = d != null ? d.ItemCode : null,
+                //        ColorCode = d != null ? d.ColorCode : null,
+                //        Size = d != null ? d.Size : null,
+                //        OutQty = d != null ? d.OutQty : null,
+                //        UOM = d != null ? d.UOM : null,
+                //    }
+                //).ToListAsync();
                 return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
             }
             catch (Exception ex)
@@ -634,39 +637,31 @@ namespace RFIDApi.Service.FPSService
             using var transaction = await _fpsContext.Database.BeginTransactionAsync();
             try
             {
-                var outDetail = await _fpsContext.warehouseRequestOutDetails
-                    .Where(t => t.OutNo == req.outNo && t.ItemCode == req.productCode && t.ColorCode == req.colorCode && t.Size == req.size).ToListAsync();
+                await _fpsContext.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_WarehouseUpdateOutStatus {0}, {1}, {2}, {3}",
+                    req.outNo, req.productCode, req.colorCode, req.size
+                );
 
-                if (outDetail == null)
-                {
-                    return ResponseFactory<object>.Failed("Not found request outstock detail");
-                }
+                var userName = _httpContextAccessor.HttpContext?
+                        .User?
+                        .FindFirst(ClaimTypes.Name)?.Value;
 
-                foreach(var item in outDetail)
-                {
-                    item.OutStatus = true;
-                }
+                _logger.LogInformation(userName);
 
-                var res = await _fpsContext.warehouseTransections.ToListAsync();
-                var DictionaryRfid = new Dictionary<string, List<FPSWarehouseTransection>>();
-                foreach (var item in res)
-                {
-                    if (!DictionaryRfid.ContainsKey(item.RFId))
-                    {
-                        DictionaryRfid[item.RFId] = new List<FPSWarehouseTransection>();
-                    }
-                    DictionaryRfid[item.RFId].Add(item);
-                }
                 foreach (var item in req.rfidlist)
                 {
-                    var tran = DictionaryRfid.TryGetValue(item.rfid, out var tranList)
-                        ? tranList.FirstOrDefault(t => t.OutStatus == false)
-                        : null;
-                    if (tran != null)
-                    {
-                        tran.OutStatus = true;
-                        tran.OutDate = DateTime.Now.Date;
-                    }
+                    var tran = await _fpsContext.warehouseTransections
+                        .FirstOrDefaultAsync(t => t.RFId == item && t.OutStatus == false);
+
+                    if (tran == null)
+                        return ResponseFactory<object>.Failed($"RFID {item} invalid");
+
+                    tran.OutNo = req.outNo;
+                    tran.OutStatus = true;
+                    tran.OutType = req.outType;
+                    tran.OutDate = req.outDate ?? DateTime.Now;
+                    tran.InputBy = userName;
+                    tran.InputOutDate = DateTime.Now;
                 }
 
                 await _fpsContext.SaveChangesAsync();
@@ -677,6 +672,41 @@ namespace RFIDApi.Service.FPSService
             {
                 await transaction.RollbackAsync();
                 return ResponseFactory<object>.Failed(ex.Message);
+            }
+        }
+
+        public async Task<ResponseDTO<List<WarehouseShowRequestOutResonseDTO>>> GetShowRequestOUT(ShowRequestOutResponseDTO req)
+        {
+            try
+            {
+                var companyCode = _httpContextAccessor.HttpContext?
+                    .User?
+                    .Claims
+                    .FirstOrDefault(c => c.Type == "CompanyCode")
+                    ?.Value;
+
+                var result = _fpsContext.Set<WarehouseShowRequestOutResonseDTO>()
+                    .FromSqlRaw("EXEC sp_WarehouseShowRequestOut {0}, {1}, {2}, {3}, {4}", companyCode, req.OutNo, req.ItemCode, req.Color, req.Size)
+                    .AsEnumerable()  // ← บังคับให้ผลลัพธ์มาอยู่ใน memory ก่อน
+                    .ToList();
+
+
+                return ResponseFactory<List<WarehouseShowRequestOutResonseDTO>>.Ok("Success", result);
+            }
+            catch(Exception ex)
+            {
+                return ResponseFactory<List<WarehouseShowRequestOutResonseDTO>>.Failed(ex.Message);
+            }
+        }
+
+        public async Task<ResponseDTO<string>> GetCurrentUser()
+        {
+            try
+            {
+                return ResponseFactory<string>.Ok("SuccessUser", "Data");
+            }catch(Exception ex)
+            {
+                return ResponseFactory<string>.Failed(ex.Message);
             }
         }
     }

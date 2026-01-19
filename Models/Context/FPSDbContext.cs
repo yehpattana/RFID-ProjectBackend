@@ -31,7 +31,8 @@ namespace RFIDApi.Models.Context
             modelBuilder.Entity<WarehouseReceive>().HasMany(p => p.WarehouseTransections).WithOne(w => w.WarehouseReceive).HasForeignKey(f => f.ReceiveNo);
 
             modelBuilder.Entity<GenReceiveNoResultDTO>().HasNoKey().ToView(null); // บอก EF ว่าไม่ผูก table จริง
-
+            modelBuilder.Entity<WarehouseRequestOutMergeDTO>().HasNoKey();
+            modelBuilder.Entity<WarehouseShowRequestOutResonseDTO>().HasNoKey();
             base.OnModelCreating(modelBuilder);
         }
 

@@ -146,6 +146,7 @@ namespace RFIDApi.controller
             throw new NotImplementedException();
         }
 
+        //SCAN RFID TAG AND SEND TO CLIENT
         void IAsynchronousMessage.OutPutTags(Tag_Model tag)
         {
             try

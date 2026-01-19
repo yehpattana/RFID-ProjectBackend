@@ -64,9 +64,9 @@ namespace RFIDApi.Controller.FPS
 
         [Authorize]
         [HttpGet("CheckDetail")]
-        public async Task<IActionResult> GetCheckDetail([FromQuery]CheckRequestOutstock req)
+        public async Task<IActionResult> GetCheckDetail([FromQuery] CheckRequestOutstock req)
         {
-            var result = await _service.GetCheckDetail(req.ItemCode,req.ColorCode,req.Size);
+            var result = await _service.GetCheckDetail(req.ItemCode, req.ColorCode, req.Size);
             if (result.IsSuccess)
             {
                 return Ok(result);
@@ -79,9 +79,24 @@ namespace RFIDApi.Controller.FPS
 
         [Authorize]
         [HttpGet("GetUOM")]
-        public async Task<IActionResult> GetUOM([FromQuery]CheckRequestOutstock req)
+        public async Task<IActionResult> GetUOM([FromQuery] CheckRequestOutstock req)
         {
             var result = await _service.GetUOM(req.ItemCode, req.ColorCode, req.Size);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest(result);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("GetOutDetail")]
+        public async Task<IActionResult> GetOutDetail()
+        {
+            var result = await _service.GetOutDetail();
             if (result.IsSuccess)
             {
                 return Ok(result);

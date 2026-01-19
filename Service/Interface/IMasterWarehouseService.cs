@@ -23,7 +23,10 @@ namespace RFIDApi.Service.Interface
         Task<ResponseDTO<object>> UpdateRequestOutstock(string requestOutNo, WarehouseOutstockDTO req);
         Task<ResponseDTO<object>> DeleteRequestOutstock(string requestOutNo);
         Task<ResponseDTO<List<WarehouseRequestOutDetail>>> GetDetailRequest(string requestOutNo);
-
+        Task<ResponseDTO<List<WarehouseShowRequestOutResonseDTO>>> GetShowRequestOUT(ShowRequestOutResponseDTO req);
         Task<ResponseDTO<object>> CreateWarehouseOutstock(CreateWarehouseOutDTO req);
+
+        Task<ResponseDTO<string>> GetCurrentUser ();
+
     }
 }

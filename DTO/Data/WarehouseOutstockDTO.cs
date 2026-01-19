@@ -1,4 +1,5 @@
-﻿using RFIDApi.Models.FPS;
+﻿using Microsoft.EntityFrameworkCore;
+using RFIDApi.Models.FPS;
 
 namespace RFIDApi.DTO.Data
 {
@@ -16,26 +17,19 @@ namespace RFIDApi.DTO.Data
         public int BalanceQty { get; set; }
     }
 
+    [Keyless]
     public class WarehouseRequestOutMergeDTO
     {
-        // ===== Main =====
         public string OutNo { get; set; } = null!;
+        public string OutType { get; set; } = null!;
         public DateTime RequestDate { get; set; }
         public string RequestBy { get; set; } = null!;
-        public string OutType { get; set; } = null!;
-        public string CreateBy { get; set; } = null!;
-        public string? PONo { get; set; }
-        public DateTime CreateDate { get; set; }
-        public string EditBy { get; set; } = null!;
-        public DateTime EditDate { get; set; }
-
-        // ===== Detail (LEFT JOIN) =====
         public string? ItemCode { get; set; }
         public string? ColorCode { get; set; }
         public string? Size { get; set; }
         public int? OutQty { get; set; }
         public string? UOM { get; set; }
-        public bool? OutStatus { get; set; }
+
     }
     public class RequestOutHeaderDto
     {
@@ -68,14 +62,11 @@ namespace RFIDApi.DTO.Data
         public string RequestOutNo { get; set; } = string.Empty;
         public string OutType { get; set; } = string.Empty;
         public DateTime OutDate { get; set; }
-
         public string ProductCode { get; set; } = string.Empty;
         public string? Color { get; set; }
         public string? Size { get; set; }
-
         public decimal OutQty { get; set; }
     }
-
 
     public class CreateWarehouseOutDTO
     {
@@ -86,11 +77,25 @@ namespace RFIDApi.DTO.Data
         public string? colorCode { get; set; }
         public string? size { get; set; }
         public int outQty { get; set; }
-        public List<RFIDListDTO>? rfidlist { get; set; }
+        public string[]? rfidlist { get; set; }
     }
 
-    public class RFIDListDTO
+    [Keyless]
+    public class WarehouseShowRequestOutResonseDTO
     {
-        public string rfid { get; set; }
+        public string? OutNo { get; set; }
+        public string? SKU { get; set; }
+        public string? ItemCode { get; set; }
+        public string? ColorCode { get; set; }
+        public string? Size { get; set; }
+        public string? UOM { get; set; }
+        public string? OutType { get; set; }
+    }
+    public class ShowRequestOutResponseDTO
+    {
+        public string OutNo { get; set; } = string.Empty;
+        public string ItemCode { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+        public string Size { get; set; } = string.Empty;
     }
 }
