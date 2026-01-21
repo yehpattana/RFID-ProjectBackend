@@ -12,6 +12,7 @@
         public string? warehouse { get; set; }
         public string? createdBy { get; set; }
         public string? remark { get; set; }
+        public string? location { get; set; }
         public List<RFIDPOList>? rfidlist { get; set; }
     }
 

@@ -9,11 +9,12 @@ namespace RFIDApi.Models.FPS
 
     public class FPSWarehouseTransection
     {
-        public string ReceiveNo { get; set; }          // [ReceiveNo]
-        public string Warehouse { get; set; }         // [Warehouse]
-        public string RFId { get; set; }              // [RFId]
-        public string CompanyCode { get; set; }       // [CompanyCode]
-        public string PONo { get; set; }              // [PONo]
+        public string? ReceiveNo { get; set; }          // [ReceiveNo]
+        public string? Warehouse { get; set; }         // [Warehouse]
+        public string? RFId { get; set; }              // [RFId]
+        public string? CompanyCode { get; set; }       // [CompanyCode]
+        public string? PONo { get; set; }              // [PONo]
+        public string? Location { get; set; }          // [Location]
         public int? POItemNo { get; set; }          // [POItemNo]
         public string? OrderNo { get; set; }           // [OrderNo]
         public string? UOM { get; set; }               // [UOM]

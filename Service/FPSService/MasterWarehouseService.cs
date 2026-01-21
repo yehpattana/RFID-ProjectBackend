@@ -173,6 +173,7 @@ namespace RFIDApi.Service.FPSService
                     {
                         ReceiveNo = newData.ReceiveNo,
                         Warehouse = newData.Warehouse,
+                        Location = req.location,
                         RFId = item.rfid,
                         CompanyCode = newData.CompanyCode,
                         PONo = item.poNo,
@@ -226,6 +227,7 @@ namespace RFIDApi.Service.FPSService
                     if (exist != null)
                     {
                         exist.Warehouse = existData.Warehouse;
+                        exist.Location = req.location;
                         exist.ReceiveDate = DateTime.Now;
                     }
                 }
@@ -357,6 +359,7 @@ namespace RFIDApi.Service.FPSService
         }
 
         // OutStock
+        
         public async Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetWarehouseRequestOut()
         {
             try
@@ -389,7 +392,7 @@ namespace RFIDApi.Service.FPSService
                 return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Failed(ex.Message);
             }
         }
-        public async Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetWarehouseRequestOutByOutNo(string OutNo)
+        public async Task<ResponseDTO<List<WarehouseRequestOutMainDetailsDTO>>> GetWarehouseRequestOutByOutNo(string OutNo)
         {
             try
             {
@@ -399,13 +402,14 @@ namespace RFIDApi.Service.FPSService
                         on m.OutNo equals d.OutNo into md
                     from d in md.DefaultIfEmpty()   // ✅ LEFT JOIN
                     where m.OutNo == OutNo
-                    select new WarehouseRequestOutMergeDTO
+                    select new WarehouseRequestOutMainDetailsDTO
                     {
                         // ===== Main =====
                         OutNo = m.OutNo,
                         RequestDate = m.RequestDate,
                         RequestBy = m.RequestBy,
                         OutType = m.OutType,
+                        PoNo = m.PONo,
                         // ===== Detail =====
                         ItemCode = d != null ? d.ItemCode : null,
                         ColorCode = d != null ? d.ColorCode : null,
@@ -415,11 +419,11 @@ namespace RFIDApi.Service.FPSService
                         
                     }
                 ).ToListAsync();
-                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Ok("Success", result);
+                return ResponseFactory<List<WarehouseRequestOutMainDetailsDTO>>.Ok("Success", result);
             }
             catch (Exception ex)
             {
-                return ResponseFactory<List<WarehouseRequestOutMergeDTO>>.Failed(ex.Message);
+                return ResponseFactory<List<WarehouseRequestOutMainDetailsDTO>>.Failed(ex.Message);
             }
         }
         public async Task<ResponseDTO<List<WarehouseRequestOutMergeDTO>>> GetListRequestOutstock()
@@ -498,7 +502,7 @@ namespace RFIDApi.Service.FPSService
                 var newMain = new WarehouseRequestOutMain
                 {
                     OutNo = req.Header.RequestNo,
-                    RequestDate = req.Header.RequestDate,
+                    RequestDate = req.Header.RequestDate.Date,
                     RequestBy = req.Header.RequestBy,
                     OutType = req.Header.OutType,
                     PONo = req.Header.PONo,
@@ -699,14 +703,17 @@ namespace RFIDApi.Service.FPSService
             }
         }
 
-        public async Task<ResponseDTO<string>> GetCurrentUser()
+        public async Task<ResponseDTO<List<WarehouseRequestOutMain>>> GetRequestMainByOutNo(string outNo)
         {
             try
             {
-                return ResponseFactory<string>.Ok("SuccessUser", "Data");
-            }catch(Exception ex)
+                var res = await _fpsContext.warehouseRequestOutMains.Where(t => t.OutNo == outNo).ToListAsync();
+
+                return ResponseFactory<List<WarehouseRequestOutMain>>.Ok("Success", res);
+            }
+            catch(Exception ex)
             {
-                return ResponseFactory<string>.Failed(ex.Message);
+                return ResponseFactory<List<WarehouseRequestOutMain>>.Failed(ex.Message);
             }
         }
     }

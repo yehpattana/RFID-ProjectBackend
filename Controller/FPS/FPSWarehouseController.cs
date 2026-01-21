@@ -318,13 +318,13 @@ namespace RFIDApi.Controller.FPS
         }
 
         [Authorize]
-        [HttpGet("GetCurrentUser")]
+        [HttpGet("GetRequestMainByOutNo/{outNo}")]
 
-        public async Task<IActionResult> GetCurrentUser()
+        public async Task<IActionResult> GetRequestMainByOutNo(string outNo)
         {
             try
             {
-                var res = await _service.GetCurrentUser();
+                var res = await _service.GetRequestMainByOutNo(outNo);
                 if (!res.IsSuccess)
                 {
                     return BadRequest(res);

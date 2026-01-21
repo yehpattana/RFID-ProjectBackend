@@ -31,6 +31,21 @@ namespace RFIDApi.DTO.Data
         public string? UOM { get; set; }
 
     }
+
+    public class WarehouseRequestOutMainDetailsDTO
+    {
+        public string OutNo { get; set; } = null!;
+        public string OutType { get; set; } = null!;
+        public DateTime RequestDate { get; set; }
+        public string? PoNo { get; set; }
+        public string RequestBy { get; set; } = null!;
+        public string? ItemCode { get; set; }
+        public string? ColorCode { get; set; }
+        public string? Size { get; set; }
+        public int? OutQty { get; set; }
+        public string? UOM { get; set; }
+
+    }
     public class RequestOutHeaderDto
     {
         public string RequestNo { get; set; } = string.Empty; // auto / generate

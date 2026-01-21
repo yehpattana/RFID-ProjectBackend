@@ -121,10 +121,14 @@ namespace RFIDApi.controller
                     .FirstOrDefaultAsync(t => t.RFID == epc);
 
                 var inStock = await _fbContext.warehouseRFIDs.FirstOrDefaultAsync(t => t.RFID == epc);
+                var isOutStock = await _fbContext.warehouseTransections.FirstOrDefaultAsync(t => t.RFId == epc && t.OutStatus);
                 bool isFound = false;
                 bool isOut = false;
-
-                if(existTag != null && existTag.ColorCode == req.Color && existTag.Size == req.Size && existTag.ItemCode == req.ProductCode && inStock != null)
+                if(isOutStock != null)
+                {
+                    isOut = true;
+                }
+                if (existTag != null && existTag.ColorCode == req.Color && existTag.Size == req.Size && existTag.ItemCode == req.ProductCode && inStock != null)
                 {
                     isFound = true;
                 }

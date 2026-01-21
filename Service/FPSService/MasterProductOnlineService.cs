@@ -73,6 +73,7 @@ namespace RFIDApi.Service.FPSService
                     {
                         Warehouse = a.Warehouse,
                         RFId = a.RFId,
+                        Locations = a.Location,
                         ProductBarcode = d.ProductBarcode,
                         SKU = b.SKU,
                         ItemCode = b.ItemCode,
@@ -113,7 +114,7 @@ namespace RFIDApi.Service.FPSService
                     from a in _fpsContext.warehouseTransections
                     join b in _fpsContext.warehouseRFIDs
                         on a.RFId equals b.RFID
-                    where a.OutStatus == true
+                    where a.OutStatus == false
                        && b.ItemCode == itemCode
                        && b.ColorCode == colorCode
                        && b.Size == size

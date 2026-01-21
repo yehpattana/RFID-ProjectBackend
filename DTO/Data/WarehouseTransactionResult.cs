@@ -4,6 +4,7 @@
     {
         public string? Warehouse { get; set; }
         public string? RFId { get; set; }
+        public string? Locations { get; set; }
         public string? ProductBarcode { get; set; }
         public string? SKU { get; set; }
         public string? ItemCode { get; set; }
