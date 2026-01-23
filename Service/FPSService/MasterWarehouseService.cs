@@ -505,7 +505,7 @@ namespace RFIDApi.Service.FPSService
                     RequestDate = req.Header.RequestDate.Date,
                     RequestBy = req.Header.RequestBy,
                     OutType = req.Header.OutType,
-                    PONo = req.Header.PONo,
+                    PONo = req.Header.PONo ?? " ",
                     CreateBy = req.Header.RequestBy,
                     CreateDate = DateTime.Now,
                     EditBy = req.Header.CreateBy ?? "System",
