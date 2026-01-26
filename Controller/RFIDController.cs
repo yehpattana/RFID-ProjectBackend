@@ -31,7 +31,7 @@ namespace RFIDApi.controller
         private readonly IHubContext<RFIDHubs> _hubContext;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ConcurrentDictionary<string, DateTime> _lastSeen = new();
-        private readonly TimeSpan _window = TimeSpan.FromSeconds(3);
+        private readonly TimeSpan _window = TimeSpan.FromSeconds(1);
         public RFIDController(RFIDDbContext db,FPSDbContext fbContext, IHubContext<RFIDHubs> hubContext, IServiceScopeFactory scopeFactory)
         {
             _context = db;
@@ -151,14 +151,14 @@ namespace RFIDApi.controller
         }
 
         //SCAN RFID TAG AND SEND TO CLIENT
-        void IAsynchronousMessage.OutPutTags(Tag_Model tag)
+        async void IAsynchronousMessage.OutPutTags(Tag_Model tag)
         {
             try
             {
-                if (!ShouldAccept(tag.EPC))
-                {
-                    return;
-                }
+                //if (!ShouldAccept(tag.EPC))
+                //{
+                //    return;
+                //}
 
                 var newTag = new RFIDTag
                 {
@@ -171,8 +171,8 @@ namespace RFIDApi.controller
                 };
 
                 //await Task.Delay(0);
-                //await _hubContext.Clients.All.SendAsync("ReceiveRFIDData", newTag);
-                RfidSignalRQueue.SignalChannel.Writer.TryWrite(newTag);
+                await _hubContext.Clients.All.SendAsync("ReceiveRFIDData", newTag);
+                //RfidSignalRQueue.SignalChannel.Writer.TryWrite(newTag);
                 //Debug.WriteLine($"Tag detected and sent to clients: {json}");
                 displayedEpcs.Add(tag.EPC);
             }
@@ -181,6 +181,24 @@ namespace RFIDApi.controller
                 Debug.WriteLine($"Error in OutPutTags: {ex.Message}");
             }
         }
+
+        //[HttpGet("GetSKUFromEPC/{epc}")]
+        //public async Task<IActionResult> GetSKUFromEPC(string epc)
+        //{
+        //    try
+        //    {
+        //        var res = await _fbContext.warehouseRFIDs.FirstOrDefaultAsync(x => x.RFID == epc);
+        //        if(res != null && res.RFID == null)
+        //        {
+        //            return Ok("");
+        //        }
+        //        return Ok();
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
         [NonAction]
         public int SetHF340ANTPower(string connID, Dictionary<int, int> antPower)
         {
