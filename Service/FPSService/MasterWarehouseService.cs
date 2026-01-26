@@ -663,9 +663,9 @@ namespace RFIDApi.Service.FPSService
                     tran.OutNo = req.outNo;
                     tran.OutStatus = true;
                     tran.OutType = req.outType;
-                    tran.OutDate = req.outDate ?? DateTime.Now;
+                    tran.OutDate = req.outDate.HasValue ? req.outDate.Value.Date : DateTime.Now.Date;
                     tran.InputBy = userName;
-                    tran.InputOutDate = DateTime.Now;
+                    tran.InputOutDate = DateTime.Now.Date;
                 }
 
                 await _fpsContext.SaveChangesAsync();
