@@ -84,6 +84,8 @@ namespace RFIDApi.controller
             Debug.WriteLine($"RFID Has Stop"); // Log ไป Console
         }
 
+        // Return
+
         [HttpGet("CheckEPC/{epc}")]
         public async Task<IActionResult> CheckEPC(string epc)
         {
@@ -110,7 +112,7 @@ namespace RFIDApi.controller
                 return BadRequest(ex.Message);
             }
         }
-
+        //กดเบิกออก
         [HttpPost("CheckEPCOutStock/{epc}")]
         public async Task<IActionResult> CheckEPCOutStock(string epc, ScanOutStockRequestDto req)
         {
